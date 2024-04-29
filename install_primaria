@@ -43,8 +43,7 @@ system_pm2_install
 system_docker_install
 system_puppeteer_dependencies
 system_snapd_install
-system_nginx_install
-system_certbot_install
+# Skip NGINX and Certbot installation as they are not needed for localhost setup
 
 # system config
 system_create_user
@@ -58,16 +57,14 @@ backend_node_build
 backend_db_migrate
 backend_db_seed
 backend_start_pm2
-backend_nginx_setup
 
 # frontend related
 frontend_set_env
 frontend_node_dependencies
 frontend_node_build
 frontend_start_pm2
-frontend_nginx_setup
 
 # network related
-system_nginx_conf
-system_nginx_restart
-system_certbot_setup
+# Skip NGINX and Certbot setup
+
+echo "Whaticket primary installation completed for local testing without SSL using the local machine's IP address."
