@@ -43,10 +43,10 @@ backend_set_env() {
   sleep 2
 
   # Adjust backend URL to use HTTP
-  backend_url="http://${backend_url}"
+  backend_url="${backend_url}"
 
   # Adjust frontend URL to use HTTP
-  frontend_url="http://${frontend_url}"
+  frontend_url="${frontend_url}"
 
   sudo su - deploy << EOF
   cat <<[-]EOF > /home/deploy/${instancia_add}/backend/.env
