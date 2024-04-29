@@ -37,6 +37,7 @@ source "${PROJECT_ROOT}"/config
 inquiry_options
 
 # dependencies related
+# Skip todas as etapas de instalação de pacotes relacionadas a NGINX e Certbot
 #system_update
 #system_node_install
 #system_pm2_install
@@ -71,3 +72,5 @@ frontend_nginx_setup
 #system_nginx_conf
 system_nginx_restart
 system_certbot_setup
+
+echo "Whaticket instance installed successfully for local testing without SSL and domain using the local machine's IP address."
