@@ -1,6 +1,7 @@
 #!/bin/bash
-#
+# 
 # Functions for setting up app backend
+
 #######################################
 # Creates REDIS db using docker
 # Arguments:
@@ -42,8 +43,15 @@ backend_set_env() {
 
   sleep 2
 
+  # Adjust backend URL to use HTTP
+  backend_url="http://192.168.5.39:3001"
+
+  # Adjust frontend URL to use HTTP
+  frontend_url="http://192.168.5.39:3000"
+
   sudo su - deploy << EOF
   cat <<[-]EOF > /home/deploy/${instancia_add}/backend/.env
+NODE_ENV=
 BACKEND_URL=${backend_url}
 FRONTEND_URL=${frontend_url}
 PROXY_PORT=443
@@ -212,7 +220,7 @@ EOF
 }
 
 #######################################
-# Updates frontend code
+# Sets up nginx for backend
 # Arguments:
 #   None
 #######################################
@@ -223,9 +231,9 @@ backend_nginx_setup() {
 
   sleep 2
 
-  backend_hostname=$(echo "${backend_url}:${backend_port}" | sed 's#^http://##')
+  backend_hostname=$(echo "${backend_url/https:\/\/}")
 
-  sudo su - root << EOF
+sudo su - root << EOF
 cat > /etc/nginx/sites-available/${instancia_add}-backend << 'END'
 server {
   server_name $backend_hostname;
