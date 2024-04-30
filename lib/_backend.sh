@@ -42,12 +42,6 @@ backend_set_env() {
 
   sleep 2
 
-  # Adjust backend URL to use HTTP
-  backend_url="${backend_url}"
-
-  # Adjust frontend URL to use HTTP
-  frontend_url="${frontend_url}"
-
   sudo su - deploy << EOF
   cat <<[-]EOF > /home/deploy/${instancia_add}/backend/.env
 BACKEND_URL=${backend_url}
@@ -229,7 +223,7 @@ backend_nginx_setup() {
 
   sleep 2
 
-  backend_hostname=$(echo "${backend_url/https:\/\/}")
+  backend_hostname=$(echo "${backend_url}" | sed 's#^http://##')
 
   sudo su - root << EOF
 cat > /etc/nginx/sites-available/${instancia_add}-backend << 'END'
