@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# functions for setting up app backend
+# Functions for setting up app backend
 #######################################
-# creates REDIS db using docker
+# Creates REDIS db using docker
 # Arguments:
 #   None
 #######################################
@@ -27,12 +27,11 @@ backend_redis_create() {
   exit
 EOF
 
-sleep 2
-
+  sleep 2
 }
 
 #######################################
-# sets environment variable for backend.
+# Sets environment variable for backend.
 # Arguments:
 #   None
 #######################################
@@ -43,19 +42,8 @@ backend_set_env() {
 
   sleep 2
 
-  # ensure idempotency
-  backend_url=$(echo "${backend_url::${backend_port}/http:\/\/}")
-  backend_url=${backend_url:${backend_port}%%/*}
-  backend_url=http://$backend_url:${backend_port}
-
-  # ensure idempotency
-  frontend_url=$(echo "${frontend_url:${frontend_port}/http:\/\/}")
-  frontend_url=${frontend_url:${frontend_port}%%/*}
-  frontend_url=http://$frontend_url:${frontend_port}
-
-sudo su - deploy << EOF
+  sudo su - deploy << EOF
   cat <<[-]EOF > /home/deploy/${instancia_add}/backend/.env
-NODE_ENV=
 BACKEND_URL=${backend_url}
 FRONTEND_URL=${frontend_url}
 PROXY_PORT=443
@@ -92,7 +80,7 @@ EOF
 }
 
 #######################################
-# installs node.js dependencies
+# Installs node.js dependencies
 # Arguments:
 #   None
 #######################################
@@ -112,7 +100,7 @@ EOF
 }
 
 #######################################
-# compiles backend code
+# Compiles backend code
 # Arguments:
 #   None
 #######################################
@@ -132,7 +120,7 @@ EOF
 }
 
 #######################################
-# updates frontend code
+# Updates frontend code
 # Arguments:
 #   None
 #######################################
@@ -163,7 +151,7 @@ EOF
 }
 
 #######################################
-# runs db migrate
+# Runs db migrate
 # Arguments:
 #   None
 #######################################
@@ -183,7 +171,7 @@ EOF
 }
 
 #######################################
-# runs db seed
+# Runs db seed
 # Arguments:
 #   None
 #######################################
@@ -203,7 +191,7 @@ EOF
 }
 
 #######################################
-# starts backend using pm2 in 
+# Starts backend using pm2 in 
 # production mode.
 # Arguments:
 #   None
@@ -224,7 +212,7 @@ EOF
 }
 
 #######################################
-# updates frontend code
+# Updates frontend code
 # Arguments:
 #   None
 #######################################
@@ -235,9 +223,9 @@ backend_nginx_setup() {
 
   sleep 2
 
-  backend_hostname=$(echo "${backend_url/https:\/\/}")
+  backend_hostname=$(echo "${backend_url}:${backend_port}" | sed 's#^http://##')
 
-sudo su - root << EOF
+  sudo su - root << EOF
 cat > /etc/nginx/sites-available/${instancia_add}-backend << 'END'
 server {
   server_name $backend_hostname;
