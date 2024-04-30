@@ -33,8 +33,8 @@ backend_set_env() {
 
   sudo -u deploy cat <<EOF > /home/deploy/${instancia_add}/backend/.env
 NODE_ENV=
-BACKEND_URL=http://localhost:${backend_port}
-FRONTEND_URL=http://localhost:${frontend_port}
+BACKEND_URL=http://192.168.5.39:${backend_port}
+FRONTEND_URL=http://192.168.5.39:${frontend_port}
 PROXY_PORT=80
 PORT=${backend_port}
 
@@ -157,7 +157,7 @@ server {
   server_name ${backend_url};
 
   location / {
-    proxy_pass http://localhost:${backend_port};
+    proxy_pass http://192.168.5.39:${backend_port};
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection 'upgrade';
