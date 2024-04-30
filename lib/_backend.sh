@@ -44,13 +44,13 @@ backend_set_env() {
   sleep 2
 
   # ensure idempotency
-  backend_url=$(echo "${backend_url/https:\/\/}")
-  backend_url=${backend_url%%/*}
+  backend_url=$(echo "${backend_url::${backend_port}/http:\/\/}")
+  backend_url=${backend_url:${backend_port}%%/*}
   backend_url=http://$backend_url:${backend_port}
 
   # ensure idempotency
-  frontend_url=$(echo "${frontend_url/https:\/\/}")
-  frontend_url=${frontend_url%%/*}
+  frontend_url=$(echo "${frontend_url:${frontend_port}/http:\/\/}")
+  frontend_url=${frontend_url:${frontend_port}%%/*}
   frontend_url=http://$frontend_url:${frontend_port}
 
 sudo su - deploy << EOF
