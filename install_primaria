@@ -1,54 +1,52 @@
 #!/bin/bash
 
-# reset shell colors
+# Reset shell colors
 tput init
 
-# https://stackoverflow.com/questions/59895/how-to-get-the-source-directory-of-a-bash-script-from-within-the-script-itself
+# Get the directory of the script
 SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+while [ -h "$SOURCE" ]; do
   PROJECT_ROOT="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
   SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$PROJECT_ROOT/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+  [[ $SOURCE != /* ]] && SOURCE="$PROJECT_ROOT/$SOURCE"
 done
 PROJECT_ROOT="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
-# required imports
-source "${PROJECT_ROOT}"/variables/manifest.sh
-source "${PROJECT_ROOT}"/utils/manifest.sh
-source "${PROJECT_ROOT}"/lib/manifest.sh
+# Required imports
+source "${PROJECT_ROOT}/variables/manifest.sh"
+source "${PROJECT_ROOT}/utils/manifest.sh"
+source "${PROJECT_ROOT}/lib/manifest.sh"
 
-# user configs file
-if [[ ! -e "${PROJECT_ROOT}"/config ]]; then
-  cat << EOF > "${PROJECT_ROOT}"/config
+# User configs file
+if [[ ! -e "${PROJECT_ROOT}/config" ]]; then
+  cat << EOF > "${PROJECT_ROOT}/config"
 deploy_password=${deploy_password}
 mysql_root_password=${mysql_root_password}
 db_pass=${db_pass}
 EOF
 fi
 
-# this file has passwords
-sudo su - root <<EOF
-chown root:root "${PROJECT_ROOT}"/config
-chmod 700 "${PROJECT_ROOT}"/config
-EOF
-source "${PROJECT_ROOT}"/config
+# Set permissions for config file
+sudo chown root:root "${PROJECT_ROOT}/config"
+sudo chmod 700 "${PROJECT_ROOT}/config"
+source "${PROJECT_ROOT}/config"
 
-# interactive CLI
+# Interactive CLI
 inquiry_options
 
-# dependencies related
+# Dependencies related
 system_update
 system_node_install
 system_pm2_install
 system_docker_install
 system_puppeteer_dependencies
 system_snapd_install
-# Skip NGINX and Certbot installation as they are not needed for localhost setup
+system_nginx_install
 
-# system config
+# System config
 system_create_user
 
-# backend related
+# Backend related
 system_git_clone
 backend_set_env
 backend_redis_create
@@ -58,13 +56,23 @@ backend_db_migrate
 backend_db_seed
 backend_start_pm2
 
-# frontend related
-frontend_set_env
-frontend_node_dependencies
-frontend_node_build
-frontend_start_pm2
+# Nginx setup
+sudo rm /etc/nginx/sites-enabled/default
+cat << EOF | sudo tee /etc/nginx/sites-available/whaticket
+server {
+    listen 80;
+    server_name _;
+    location / {
+        proxy_pass http://localhost:3000; # Assuming backend runs on port 3000
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+    }
+}
+EOF
+sudo ln -s /etc/nginx/sites-available/whaticket /etc/nginx/sites-enabled/
+sudo systemctl restart nginx
 
-# network related
-# Skip NGINX and Certbot setup
-
-echo "Whaticket primary installation completed for local testing without SSL using the local machine's IP address."
+echo "WhatiTicket installed and configured. You can access it at http://your_ip_address"
