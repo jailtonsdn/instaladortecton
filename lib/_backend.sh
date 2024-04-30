@@ -1,11 +1,10 @@
 #!/bin/bash
-# 
-# Functions for setting up app backend
-
+#
+# Funções para configurar o backend do aplicativo
 #######################################
-# Creates REDIS db using docker
-# Arguments:
-#   None
+# Cria o banco de dados REDIS usando o Docker
+# Argumentos:
+#   Nenhum
 #######################################
 backend_redis_create() {
   print_banner
@@ -14,27 +13,16 @@ backend_redis_create() {
 
   sleep 2
 
-  sudo su - root <<EOF
-  usermod -aG docker deploy
-  docker run --name redis-${instancia_add} -p ${redis_port}:6379 --restart always --detach redis redis-server --requirepass ${mysql_root_password}
+  sudo docker run --name redis-${instancia_add} -p ${redis_port}:6379 --restart always --detach redis redis-server --requirepass ${mysql_root_password}
   
-  sleep 2
-  sudo su - postgres
-  createdb ${instancia_add};
-  psql
-  CREATE USER ${instancia_add} SUPERUSER INHERIT CREATEDB CREATEROLE;
-  ALTER USER ${instancia_add} PASSWORD '${mysql_root_password}';
-  \q
-  exit
-EOF
-
-  sleep 2
+  sudo -u postgres createdb ${instancia_add}
+  sudo -u postgres psql -c "CREATE USER ${instancia_add} SUPERUSER INHERIT CREATEDB CREATEROLE PASSWORD '${mysql_root_password}'"
 }
 
 #######################################
-# Sets environment variable for backend.
-# Arguments:
-#   None
+# Configura variáveis de ambiente para o backend.
+# Argumentos:
+#   Nenhum
 #######################################
 backend_set_env() {
   print_banner
@@ -43,18 +31,11 @@ backend_set_env() {
 
   sleep 2
 
-  # Adjust backend URL to use HTTP
-  backend_url="http://192.168.5.39:3001"
-
-  # Adjust frontend URL to use HTTP
-  frontend_url="http://192.168.5.39:3000"
-
-  sudo su - deploy << EOF
-  cat <<[-]EOF > /home/deploy/${instancia_add}/backend/.env
+  sudo -u deploy cat <<EOF > /home/deploy/${instancia_add}/backend/.env
 NODE_ENV=
-BACKEND_URL=${backend_url}
-FRONTEND_URL=${frontend_url}
-PROXY_PORT=443
+BACKEND_URL=http://localhost:${backend_port}
+FRONTEND_URL=http://localhost:${frontend_port}
+PROXY_PORT=80
 PORT=${backend_port}
 
 DB_HOST=localhost
@@ -69,7 +50,7 @@ JWT_REFRESH_SECRET=${jwt_refresh_secret}
 
 REDIS_URI=redis://:${mysql_root_password}@127.0.0.1:${redis_port}
 REDIS_OPT_LIMITER_MAX=1
-REGIS_OPT_LIMITER_DURATION=3000
+REDIS_OPT_LIMITER_DURATION=3000
 
 USER_LIMIT=${max_user}
 CONNECTIONS_LIMIT=${max_whats}
@@ -80,17 +61,13 @@ GERENCIANET_CLIENT_ID=sua-id
 GERENCIANET_CLIENT_SECRET=sua_chave_secreta
 GERENCIANET_PIX_CERT=nome_do_certificado
 GERENCIANET_PIX_KEY=chave_pix_gerencianet
-
-[-]EOF
 EOF
-
-  sleep 2
 }
 
 #######################################
-# Installs node.js dependencies
-# Arguments:
-#   None
+# Instala dependências do Node.js
+# Argumentos:
+#   Nenhum
 #######################################
 backend_node_dependencies() {
   print_banner
@@ -99,18 +76,13 @@ backend_node_dependencies() {
 
   sleep 2
 
-  sudo su - deploy <<EOF
-  cd /home/deploy/${instancia_add}/backend
-  npm install
-EOF
-
-  sleep 2
+  sudo -u deploy npm install --prefix /home/deploy/${instancia_add}/backend
 }
 
 #######################################
-# Compiles backend code
-# Arguments:
-#   None
+# Compila o código do backend
+# Argumentos:
+#   Nenhum
 #######################################
 backend_node_build() {
   print_banner
@@ -119,49 +91,13 @@ backend_node_build() {
 
   sleep 2
 
-  sudo su - deploy <<EOF
-  cd /home/deploy/${instancia_add}/backend
-  npm run build
-EOF
-
-  sleep 2
+  sudo -u deploy npm run build --prefix /home/deploy/${instancia_add}/backend
 }
 
 #######################################
-# Updates frontend code
-# Arguments:
-#   None
-#######################################
-backend_update() {
-  print_banner
-  printf "${WHITE} 💻 Atualizando o backend...${GRAY_LIGHT}"
-  printf "\n\n"
-
-  sleep 2
-
-  sudo su - deploy <<EOF
-  cd /home/deploy/${empresa_atualizar}
-  pm2 stop ${empresa_atualizar}-backend
-  git pull
-  cd /home/deploy/${empresa_atualizar}/backend
-  npm install
-  npm update -f
-  npm install @types/fs-extra
-  rm -rf dist 
-  npm run build
-  npx sequelize db:migrate
-  npx sequelize db:seed
-  pm2 start ${empresa_atualizar}-backend
-  pm2 save 
-EOF
-
-  sleep 2
-}
-
-#######################################
-# Runs db migrate
-# Arguments:
-#   None
+# Executa migrações do banco de dados
+# Argumentos:
+#   Nenhum
 #######################################
 backend_db_migrate() {
   print_banner
@@ -170,18 +106,13 @@ backend_db_migrate() {
 
   sleep 2
 
-  sudo su - deploy <<EOF
-  cd /home/deploy/${instancia_add}/backend
-  npx sequelize db:migrate
-EOF
-
-  sleep 2
+  sudo -u deploy npx sequelize db:migrate --prefix /home/deploy/${instancia_add}/backend
 }
 
 #######################################
-# Runs db seed
-# Arguments:
-#   None
+# Executa seeds do banco de dados
+# Argumentos:
+#   Nenhum
 #######################################
 backend_db_seed() {
   print_banner
@@ -190,19 +121,13 @@ backend_db_seed() {
 
   sleep 2
 
-  sudo su - deploy <<EOF
-  cd /home/deploy/${instancia_add}/backend
-  npx sequelize db:seed:all
-EOF
-
-  sleep 2
+  sudo -u deploy npx sequelize db:seed:all --prefix /home/deploy/${instancia_add}/backend
 }
 
 #######################################
-# Starts backend using pm2 in 
-# production mode.
-# Arguments:
-#   None
+# Inicia o backend usando pm2 no modo de produção.
+# Argumentos:
+#   Nenhum
 #######################################
 backend_start_pm2() {
   print_banner
@@ -211,18 +136,13 @@ backend_start_pm2() {
 
   sleep 2
 
-  sudo su - deploy <<EOF
-  cd /home/deploy/${instancia_add}/backend
-  pm2 start dist/server.js --name ${instancia_add}-backend
-EOF
-
-  sleep 2
+  sudo -u deploy pm2 start /home/deploy/${instancia_add}/backend/dist/server.js --name ${instancia_add}-backend
 }
 
 #######################################
-# Sets up nginx for backend
-# Arguments:
-#   None
+# Configuração do Nginx para o backend
+# Argumentos:
+#   Nenhum
 #######################################
 backend_nginx_setup() {
   print_banner
@@ -231,27 +151,23 @@ backend_nginx_setup() {
 
   sleep 2
 
-  backend_hostname=$(echo "${backend_url/https:\/\/}")
-
-sudo su - root << EOF
-cat > /etc/nginx/sites-available/${instancia_add}-backend << 'END'
+sudo cat <<EOF > /etc/nginx/sites-available/${instancia_add}-backend
 server {
-  server_name $backend_hostname;
+  listen 80;
+  server_name ${backend_url};
+
   location / {
-    proxy_pass http://127.0.0.1:${backend_port};
+    proxy_pass http://localhost:${backend_port};
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection 'upgrade';
     proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-Proto \$scheme;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
     proxy_cache_bypass \$http_upgrade;
   }
 }
-END
-ln -s /etc/nginx/sites-available/${instancia_add}-backend /etc/nginx/sites-enabled
 EOF
 
-  sleep 2
+  sudo ln -s /etc/nginx/sites-available/${instancia_add}-backend /etc/nginx/sites-enabled/
+  sudo systemctl restart nginx
 }
+
