@@ -10,12 +10,12 @@ frontend_set_env() {
   sleep 2
 
   # Adjust backend URL to use HTTP
-  backend_url="http://${backend_url}:${BACKEND_PORT}"
+  backend_url="http://${backend_url}:${backend_port}"
 
 sudo su - deploy << EOF
   cat <<[-]EOF > /home/deploy/${instancia_add}/frontend/.env
 REACT_APP_BACKEND_URL=${backend_url}
-REACT_APP_BACKEND_PORT=${BACKEND_PORT}
+REACT_APP_BACKEND_PORT=${backend_port}
 REACT_APP_BACKEND_PROTOCOL=http
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=24
 [-]EOF
