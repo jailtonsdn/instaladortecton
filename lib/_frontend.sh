@@ -66,7 +66,7 @@ frontend_set_env() {
   sleep 2
 
   sudo -u deploy cat <<EOF > /home/deploy/${instancia_add}/frontend/.env
-REACT_APP_BACKEND_URL=http://localhost:${backend_port}
+REACT_APP_BACKEND_URL=http://192.168.5.39:${backend_port}
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=24
 EOF
 
@@ -117,7 +117,7 @@ server {
   server_name ${frontend_url};
 
   location / {
-    proxy_pass http://localhost:${frontend_port};
+    proxy_pass http://192.168.5.39:${frontend_port};
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection 'upgrade';
