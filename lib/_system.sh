@@ -186,15 +186,15 @@ sleep 2
 
   sudo su - deploy <<EOF
   cd && cd /home/deploy/${empresa_dominio}/frontend
-  sed -i "1c\REACT_APP_BACKEND_URL=https://${alter_backend_url}" .env
+  sed -i "1c\REACT_APP_BACKEND_URL=http://${alter_backend_url}" .env
   cd && cd /home/deploy/${empresa_dominio}/backend
-  sed -i "2c\BACKEND_URL=https://${alter_backend_url}" .env
-  sed -i "3c\FRONTEND_URL=https://${alter_frontend_url}" .env 
+  sed -i "2c\BACKEND_URL=http://${alter_backend_url}" .env
+  sed -i "3c\FRONTEND_URL=http://${alter_frontend_url}" .env 
 EOF
 
 sleep 2
    
-   backend_hostname=$(echo "${alter_backend_url/https:\/\/}")
+   backend_hostname=$(echo "${alter_backend_url/http:\/\/}")
 
  sudo su - root <<EOF
   cat > /etc/nginx/sites-available/${empresa_dominio}-backend << 'END'
@@ -218,7 +218,7 @@ EOF
 
 sleep 2
 
-frontend_hostname=$(echo "${alter_frontend_url/https:\/\/}")
+frontend_hostname=$(echo "${alter_frontend_url/http:\/\/}")
 
 sudo su - root << EOF
 cat > /etc/nginx/sites-available/${empresa_dominio}-frontend << 'END'
@@ -248,8 +248,8 @@ EOF
 
   sleep 2
 
-  backend_domain=$(echo "${backend_url/https:\/\/}")
-  frontend_domain=$(echo "${frontend_url/https:\/\/}")
+  backend_domain=$(echo "${backend_url/http:\/\/}")
+  frontend_domain=$(echo "${frontend_url/http:\/\/}")
 
   sudo su - root <<EOF
   certbot -m $deploy_email \
@@ -281,13 +281,13 @@ system_node_install() {
   sleep 2
 
   sudo su - root <<EOF
-  curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+  curl -fsSL http://deb.nodesource.com/setup_16.x | sudo -E bash -
   apt-get install -y nodejs
   sleep 2
   npm install -g npm@latest
   sleep 2
   sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-  wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+  wget --quiet -O - http://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
   sudo apt-get update -y && sudo apt-get -y install postgresql
   sleep 2
   sudo timedatectl set-timezone America/Sao_Paulo
@@ -309,13 +309,13 @@ system_docker_install() {
   sleep 2
 
   sudo su - root <<EOF
-  apt install -y apt-transport-https \
+  apt install -y apt-transport-http \
                  ca-certificates curl \
                  software-properties-common
 
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+  curl -fsSL http://download.docker.com/linux/ubuntu/gpg | apt-key add -
   
-  add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+  add-apt-repository "deb [arch=amd64] http://download.docker.com/linux/ubuntu bionic stable"
 
   apt install -y docker-ce
 EOF
@@ -526,8 +526,8 @@ system_certbot_setup() {
 
   sleep 2
 
-  backend_domain=$(echo "${backend_url/https:\/\/}")
-  frontend_domain=$(echo "${frontend_url/https:\/\/}")
+  backend_domain=$(echo "${backend_url/http:\/\/}")
+  frontend_domain=$(echo "${frontend_url/http:\/\/}")
 
   sudo su - root <<EOF
   certbot -m $deploy_email \
