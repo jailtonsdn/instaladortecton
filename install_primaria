@@ -44,6 +44,8 @@ system_docker_install
 system_puppeteer_dependencies
 system_snapd_install
 # Skip NGINX and Certbot installation as they are not needed for localhost setup
+#system_nginx_install
+#system_certbot_install
 
 # system config
 system_create_user
@@ -66,5 +68,8 @@ frontend_start_pm2
 
 # network related
 # Skip NGINX and Certbot setup
+#system_nginx_conf
+#system_nginx_restart
+#system_certbot_setup
 
 echo "Whaticket primary installation completed for local testing without SSL using the local machine's IP address."
