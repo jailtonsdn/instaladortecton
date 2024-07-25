@@ -1,9 +1,30 @@
 #!/bin/bash
 
-# reset shell colors
+# Verificar se o script está sendo executado como root
+if [ "$EUID" -ne 0 ]; então
+  echo "Por favor, execute como root"
+  exit
+fi
+
+# Verifique se o Node.js está instalado
+if ! command -v node &> /dev/null
+then
+    echo "Node.js não encontrado, instalando..."
+    apt update
+    apt install -y nodejs npm
+fi
+
+# Verifique se o PM2 está instalado
+if ! command -v pm2 &> /dev/null
+then
+    echo "PM2 não encontrado, instalando..."
+    npm install -g pm2
+fi
+
+# Reset shell colors
 tput init
 
-# get project root
+# Get project root
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do
   PROJECT_ROOT="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
@@ -12,13 +33,13 @@ while [ -h "$SOURCE" ]; do
 done
 PROJECT_ROOT="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
-# required imports
+# Required imports
 source "${PROJECT_ROOT}"/variables/manifest.sh
 source "${PROJECT_ROOT}"/utils/manifest.sh
 source "${PROJECT_ROOT}"/lib/manifest.sh
 
-# user configs file
-if [[ ! -e "${PROJECT_ROOT}"/config ]]; then
+# User configs file
+if [[ ! -e "${PROJECT_ROOT}"/config ]]; então
   cat << EOF > "${PROJECT_ROOT}"/config
 deploy_password=${deploy_password}
 mysql_root_password=${mysql_root_password}
@@ -26,17 +47,15 @@ db_pass=${db_pass}
 EOF
 fi
 
-# this file has passwords
-sudo su - root <<EOF
+# This file has passwords
 chown root:root "${PROJECT_ROOT}"/config
 chmod 700 "${PROJECT_ROOT}"/config
-EOF
 source "${PROJECT_ROOT}"/config
 
-# interactive CLI
+# Interactive CLI
 inquiry_options
 
-# dependencies related
+# Dependencies related
 system_update
 system_node_install
 system_pm2_install
@@ -44,10 +63,10 @@ system_docker_install
 system_puppeteer_dependencies
 system_snapd_install
 
-# system config
+# System config
 system_create_user
 
-# backend related
+# Backend related
 system_git_clone
 backend_set_env
 backend_redis_create
@@ -55,12 +74,12 @@ backend_node_dependencies
 backend_node_build
 backend_db_migrate
 backend_db_seed
-backend_start_pm2
+sudo -u deploy pm2 start backend_process_name
 
-# frontend related
+# Frontend related
 frontend_set_env
 frontend_node_dependencies
 frontend_node_build
-frontend_start_pm2
+sudo -u deploy pm2 start frontend_process_name
 
 echo "Whaticket instance installed successfully for local testing without SSL and domain using the local machine's IP address."
