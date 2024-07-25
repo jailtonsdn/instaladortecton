@@ -3,12 +3,12 @@
 # reset shell colors
 tput init
 
-# https://stackoverflow.com/questions/59895/how-to-get-the-source-directory-of-a-bash-script-from-within-the-script-itself
+# get project root
 SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+while [ -h "$SOURCE" ]; do
   PROJECT_ROOT="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
   SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$PROJECT_ROOT/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+  [[ $SOURCE != /* ]] && SOURCE="$PROJECT_ROOT/$SOURCE"
 done
 PROJECT_ROOT="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
@@ -43,9 +43,6 @@ system_pm2_install
 system_docker_install
 system_puppeteer_dependencies
 system_snapd_install
-# Skip NGINX and Certbot installation as they are not needed for localhost setup
-#system_nginx_install
-#system_certbot_install
 
 # system config
 system_create_user
@@ -65,11 +62,5 @@ frontend_set_env
 frontend_node_dependencies
 frontend_node_build
 frontend_start_pm2
-
-# network related
-# Skip NGINX and Certbot setup
-#system_nginx_conf
-#system_nginx_restart
-#system_certbot_setup
 
 echo "Whaticket primary installation completed for local testing without SSL using the local machine's IP address."
