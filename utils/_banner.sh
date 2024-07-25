@@ -22,13 +22,14 @@ print_banner() {
   printf "\n\n"
 
 printf "${CYAN_LIGHT}";
-printf ${CYAN_LIGHT}" ######   ######    ####    ######    ####    ##  ##  \n";
-printf ${CYAN_LIGHT}"   ##     ##       ##  ##     ##     ##  ##   ### ##  \n";
-printf ${CYAN_LIGHT}"   ##     ##       ##         ##     ##  ##   ######  \n";
-printf ${CYAN_LIGHT}"   ##     ####     ##         ##     ##  ##   ######  \n";
-printf ${CYAN_LIGHT}"   ##     ##       ##         ##     ##  ##   ## ###  \n";
-printf ${CYAN_LIGHT}"   ##     ##       ##  ##     ##     ##  ##   ##  ##  \n";
-printf ${CYAN_LIGHT}"   ##     ######    ####      ##      ####    ##  ##  \n"; 
+printf ${CYAN_LIGHT}" ######   ######    ####    ######    ##   ##   ####   ##### \n";
+printf ${CYAN_LIGHT}" ##   ##  ##  ##   ##  ##   ##  ##   ##   ##  ##  ##  ##  ## \n";
+printf ${CYAN_LIGHT}" ##   ##  ##  ##   ##  ##   ##  ##   ##   ##  ##  ##  ##  ## \n";
+printf ${CYAN_LIGHT}" ##   ##  ##  ##   ##  ##   ##  ##   ## # ##  ##  ##  #####  \n";
+printf ${CYAN_LIGHT}" ##   ##  ##  ##   ##  ##   ##  ##   ### ###  ##  ##  ## ##  \n";
+printf ${CYAN_LIGHT}" ##   ##  ##  ##   ##  ##   ##  ##   ### ###  ##  ##  ##  ## \n";
+printf ${CYAN_LIGHT}" ######   ######    ####    ######    ### ##   ####   ##  ## \n";
+
  
 
 printf "${CYAN_LIGHT}";
